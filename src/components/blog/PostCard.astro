@@ -1,14 +1,17 @@
 ---
 /**
- * PostCard — editorial listing entry ("Signal Press"). One hairline-ruled
- * row (no rounded card, no shadow, no radius): a vertical-coloured kicker
- * rule + desk label, a serif headline, a one-line dek, and a mono meta foot
- * (date · reading time). Used by every listing (index, tag, category,
- * related). The whole entry is one link; the desk kicker deep-links to the
- * category.
+ * PostCard — a gallery tile ("wall work"). A framed pigment-field canvas with
+ * a caption plate underneath, the way a piece hangs in a gallery: image first,
+ * a small wall label (desk pigment · category), the title as the work's name,
+ * and a mono date/reading foot. No hairline ledger rows — this is a wall, not
+ * a feed. Used by every listing so the whole site reads as one hung wall.
+ *
+ * Variable tile heights (tall/wide/square) are chosen deterministically from
+ * the title so a CSS-columns masonry wall never reflows between builds.
  */
 import type { CollectionEntry } from 'astro:content'
 import { formatPostDate, postVertical, slugifyTag, verticalLabel } from '~/lib/blog'
+import PigmentField from '~/components/blog/PigmentField.astro'
 
 export interface Props {
   post: CollectionEntry<'blog'>
@@ -17,129 +20,154 @@ export interface Props {
 const { post } = Astro.props
 const { title, description, pubDate, category, readingTime } = post.data
 const href = `/blog/${post.id}`
-const catHref = `/categories/${slugifyTag(category)}/`
 const vert = postVertical(post)
+
+// deterministic aspect from the title so the wall is stable
+function h(s: string): number {
+  let n = 0
+  for (let i = 0; i < s.length; i++) n = (n * 31 + s.charCodeAt(i)) >>> 0
+  return n
+}
+const ratio = (['tall', 'square', 'wide', 'square'] as const)[h(title) % 4]
 ---
 
-<article class="post-card" data-vertical={vert}>
-  <a class="post-card-link" href={href}>
-    <span class="post-card-kicker">
-      <span class="post-card-tick" aria-hidden="true"></span>
-      <span class="post-card-desk">{verticalLabel(vert)}</span>
-      <span class="post-card-cat">{category}</span>
+<article class="tile" data-vertical={vert} data-ratio={ratio}>
+  <a class="tile-link" href={href}>
+    <span class="tile-frame">
+      <PigmentField post={post} ratio={ratio} />
     </span>
-    <h3 class="post-card-title">{title}</h3>
-    <p class="post-card-desc">{description}</p>
-    <span class="post-card-foot">
-      <time datetime={pubDate.toISOString()}>{formatPostDate(pubDate)}</time>
-      {readingTime && <span class="post-card-rt">{readingTime}</span>}
+    <span class="tile-plate">
+      <span class="tile-label">
+        <span class="tile-swatch" aria-hidden="true"></span>
+        <span class="tile-desk">{verticalLabel(vert)}</span>
+        <span class="tile-cat">{category}</span>
+      </span>
+      <h3 class="tile-title">{title}</h3>
+      <span class="tile-desc">{description}</span>
+      <span class="tile-foot">
+        <time datetime={pubDate.toISOString()}>{formatPostDate(pubDate)}</time>
+        {readingTime && <span class="tile-rt">{readingTime}</span>}
+      </span>
     </span>
   </a>
-  <a class="post-card-cat-link" href={catHref} aria-label={`More in ${category}`}>{category}</a>
+  <a class="tile-cat-link" href={`/categories/${slugifyTag(category)}/`} aria-label={`More in ${category}`}>{category}</a>
 </article>
 
 <style>
-  .post-card {
+  .tile {
     position: relative;
-    border-top: 1px solid var(--rule);
     --v: var(--v-personal);
+    break-inside: avoid;
+    margin-bottom: clamp(1.5rem, 3.5vw, 2.75rem);
   }
-  .post-card[data-vertical='dev'] { --v: var(--v-dev); }
-  .post-card[data-vertical='finance'] { --v: var(--v-finance); }
-  .post-card[data-vertical='culture'] { --v: var(--v-culture); }
-  .post-card[data-vertical='health'] { --v: var(--v-health); }
+  .tile[data-vertical='dev'] { --v: var(--v-dev); }
+  .tile[data-vertical='finance'] { --v: var(--v-finance); }
+  .tile[data-vertical='culture'] { --v: var(--v-culture); }
+  .tile[data-vertical='health'] { --v: var(--v-health); }
 
-  .post-card-link {
-    display: grid;
-    gap: 0.5rem;
-    padding: 1.125rem 0 1.25rem 0.875rem;
+  .tile-link {
+    display: block;
     text-decoration: none;
     color: var(--ink);
-    border-left: 2px solid transparent;
-    margin-left: -0.875rem;
-    padding-left: 0.875rem;
-    transition: border-color var(--dur-fast, 120ms) ease;
   }
-  .post-card-link:hover { border-left-color: var(--v); }
 
-  .post-card-kicker {
+  /* the framed canvas — a hung piece, thin mount + hairline frame */
+  .tile-frame {
+    display: block;
+    position: relative;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    padding: 8px;
+    box-shadow: 0 1px 0 var(--rule-strong);
+    transition:
+      transform var(--dur-base, 200ms) var(--ease-out, ease),
+      box-shadow var(--dur-base, 200ms) var(--ease-out, ease);
+  }
+  .tile-frame :global(.pigment-field) {
+    aspect-ratio: 1 / 1;
+    height: auto;
+  }
+  .tile[data-ratio='tall'] .tile-frame :global(.pigment-field) { aspect-ratio: 3 / 4; }
+  .tile[data-ratio='wide'] .tile-frame :global(.pigment-field) { aspect-ratio: 4 / 3; }
+
+  .tile-link:hover .tile-frame {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px -14px color-mix(in oklab, var(--ink) 45%, transparent);
+  }
+  .tile-link:focus-visible { outline: none; }
+  .tile-link:focus-visible .tile-frame {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* wall-label plate under the piece */
+  .tile-plate {
+    display: block;
+    padding: 0.75rem 0.125rem 0;
+  }
+  .tile-label {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.14em;
+    font-size: 10px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--ink-mute);
   }
-  .post-card-tick {
-    width: 7px;
-    height: 7px;
+  .tile-swatch {
+    width: 8px; height: 8px; flex: 0 0 auto;
     background: var(--v);
-    flex: 0 0 auto;
+    border-radius: 1px;
   }
-  .post-card-desk { color: var(--v); font-weight: 500; }
-  .post-card-cat {
-    color: var(--ink-mute);
-    border-left: 1px solid var(--rule);
-    padding-left: 0.5rem;
-    letter-spacing: 0.1em;
-  }
+  .tile-desk { color: var(--v); font-weight: 500; }
+  .tile-cat { color: var(--ink-mute); }
 
-  .post-card-title {
+  .tile-title {
     font-family: var(--font-display);
-    font-size: 1.375rem;
+    font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: -0.015em;
-    line-height: 1.2;
-    margin: 0;
+    line-height: 1.18;
+    margin: 0.5rem 0 0;
     color: var(--ink);
   }
-  .post-card-link:hover .post-card-title { color: var(--accent); }
+  .tile-link:hover .tile-title { color: var(--accent); }
 
-  .post-card-desc {
-    color: var(--ink-mute);
-    font-family: var(--font-body);
-    font-size: 0.9375rem;
-    line-height: 1.5;
-    margin: 0;
-    max-width: 62ch;
-    overflow: hidden;
+  .tile-desc {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     line-clamp: 2;
+    overflow: hidden;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ink-mute);
+    margin-top: 0.375rem;
   }
-  .post-card-foot {
+  .tile-foot {
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.625rem;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10.5px;
     letter-spacing: 0.06em;
     color: var(--ink-mute);
+    margin-top: 0.625rem;
   }
-  .post-card-rt::before {
-    content: '·';
-    margin-right: 0.75rem;
-    color: var(--rule-strong, var(--rule));
-  }
-  /* Sibling deep-link to category — visually hidden, keyboard reachable. */
-  .post-card-cat-link {
+  .tile-rt::before { content: '·'; margin-right: 0.625rem; color: var(--rule-strong, var(--rule)); }
+
+  .tile-cat-link {
     position: absolute;
-    inset: 0 0 auto auto;
-    width: 1px;
-    height: 1px;
+    width: 1px; height: 1px;
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
-  .post-card-cat-link:focus-visible {
-    width: auto;
-    height: auto;
-    clip: auto;
-    top: 1.125rem;
-    right: 0;
+  .tile-cat-link:focus-visible {
+    width: auto; height: auto; clip: auto;
+    top: 8px; left: 8px;
     padding: 0.125rem 0.5rem;
     background: var(--paper);
     border: 1px solid var(--accent);
@@ -147,5 +175,10 @@ const vert = postVertical(post)
     font-family: var(--font-mono);
     font-size: 11px;
     text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tile-frame { transition: none; }
+    .tile-link:hover .tile-frame { transform: none; }
   }
 </style>

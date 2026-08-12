@@ -1,116 +1,101 @@
 ---
 /*
- * blog-app Footer — "Signal Press" editorial surface.
+ * Footer — gallery colophon (a wall placard, not a 4-column sitemap).
  *
- * Signature element: a serif pull-quote (Source Serif 4) with a signal-orange
- * quote mark — the only place the footer raises its voice. Everything else
- * stays library-quiet: mono column headings, mono tag links, hairline rules.
- *
- * Reads palette + type from the editorial tokens (tokens.css / global.css).
+ * One quiet strip: the pigment-swatch mark, a one-line studio statement, and
+ * a single inline row of directory links. The signature stays the maker's
+ * palette; everything else is placard-quiet. Legal/RSS wiring unchanged.
  */
 import LegalFooter from '~/components/chrome/legal/LegalFooter.astro'
-import {
-  getCategoriesWithCounts,
-  getTagsWithCounts,
-  slugifyTag,
-} from '~/lib/blog'
+import { getCategoriesWithCounts, slugifyTag } from '~/lib/blog'
 
-const categories = [
-  { name: 'All categories', slug: '' },
-  ...(await getCategoriesWithCounts()).slice(0, 6).map(({ category }) => ({
-    name: category,
-    slug: slugifyTag(category),
-  })),
+const rooms = (await getCategoriesWithCounts()).slice(0, 6).map(({ category }) => ({
+  name: category,
+  slug: slugifyTag(category),
+}))
+const links = [
+  { name: 'The wall', href: '/' },
+  { name: 'All works', href: '/blog/' },
+  { name: 'Series', href: '/series/' },
+  { name: 'Rooms', href: '/categories/' },
+  { name: 'Archive', href: '/archive/' },
+  { name: 'About', href: '/about/' },
 ]
-const tags = (await getTagsWithCounts()).slice(0, 8).map(({ tag }) => tag)
 ---
-<footer class="blog-footer" role="contentinfo">
-  <div class="bf-quote">
-    <blockquote>
-      <span aria-hidden="true" class="bf-q-mark">“</span>
-      Have nothing in your house that you do not know to be useful, or believe to be beautiful.
-    </blockquote>
-    <p class="bf-quote-attr">— William Morris · The Maker's Bench</p>
-  </div>
-  <div class="bf-grid">
-    <div class="bf-col">
-      <h3 class="bf-h">Categories</h3>
-      <ul>
-        {categories.map((c) => <li><a href={c.slug ? `/categories/${c.slug}/` : '/categories/'}>{c.name}</a></li>)}
-      </ul>
+<footer class="colophon" role="contentinfo">
+  <div class="col-inner">
+    <div class="col-mark">
+      <span class="col-swatch" aria-hidden="true"></span>
+      <p class="col-statement">
+        The Maker's Bench — a working studio wall of daily drawing, hand-lettering,
+        and the honest business of turning a craft into a living.
+      </p>
     </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Recent</h3>
-      <ul>
-        <li><a href="/blog/">Latest posts</a></li>
-        <li><a href="/archive/">Archive</a></li>
-        <li><a href="/archive/">All posts</a></li>
-        <li><a href="/now/">Now</a></li>
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Tags</h3>
-      <ul class="bf-tags">
-        {tags.map((t) => <li><a href={`/tags/${slugifyTag(t)}/`}>#{t}</a></li>)}
-      </ul>
-    </div>
-    <div class="bf-col">
-      <h3 class="bf-h">Series</h3>
-      <ul>
-        <li><a href="/series/">Browse series</a></li>
-        <li><a href="/blog/">Latest threads</a></li>
-      </ul>
-    </div>
+    <nav class="col-nav" aria-label="Directory">
+      {links.map((l) => <a href={l.href}>{l.name}</a>)}
+    </nav>
+    {rooms.length > 0 && (
+      <nav class="col-rooms mono" aria-label="Rooms">
+        {rooms.map((r) => <a href={`/categories/${r.slug}/`}>{r.name}</a>)}
+      </nav>
+    )}
   </div>
   <LegalFooter
     github="https://github.com/chirag127/oriz-blog-arts"
     appName="The Maker's Bench"
-    bio="Practical arts and crafts writing: daily drawing, hand-lettering, and earning from what you make."
+    bio="A working studio wall: daily drawing, hand-lettering, and earning from what you make."
     rss="/rss.xml"
   />
 </footer>
 <style>
-  .blog-footer {
-    margin-top: 5rem;
-    background: var(--color-paper-2, var(--paper-2, transparent));
-    color: var(--color-ink, var(--ink));
-    border-top: 1px solid var(--color-rule, var(--rule));
+  .colophon {
+    margin-top: clamp(4rem, 9vw, 6rem);
+    background: var(--paper-2);
+    color: var(--ink);
+    border-top: 1px solid var(--rule);
   }
-  .bf-quote {
-    max-width: 1200px; margin: 0 auto;
-    padding: 48px 16px 24px;
-    text-align: left;
+  .col-inner {
+    max-width: var(--container-page, 1100px);
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2.25rem) 1.5rem;
+    display: grid;
+    gap: 1.75rem;
   }
-  .bf-quote blockquote {
+  .col-mark { display: flex; align-items: flex-start; gap: 0.875rem; max-width: 60ch; }
+  .col-swatch {
+    width: 12px; height: 34px; flex: 0 0 auto; margin-top: 0.2rem;
+    background:
+      linear-gradient(var(--accent), var(--accent)) 0 0 / 100% calc(100% / 3) no-repeat,
+      linear-gradient(var(--accent-warm), var(--accent-warm)) 0 50% / 100% calc(100% / 3) no-repeat,
+      linear-gradient(var(--ochre), var(--ochre)) 0 100% / 100% calc(100% / 3) no-repeat;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+  }
+  .col-statement {
     margin: 0;
-    font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
-    font-style: normal; font-weight: 600; font-size: clamp(22px, 3.2vw, 30px);
-    line-height: 1.3; letter-spacing: -0.015em;
-    color: var(--color-ink, var(--ink)); max-width: 560px;
+    font-family: var(--font-display);
+    font-size: clamp(1.0625rem, 2.2vw, 1.375rem);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--ink);
   }
-  .bf-q-mark { font-size: 1.5em; line-height: 0; color: var(--color-accent, var(--cobalt, #e63a1f)); margin-right: 4px; }
-  .bf-quote-attr {
-    margin: 16px 0 0; font-family: var(--font-mono, ui-monospace);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em;
-    color: var(--color-ink-mute, var(--ink-mute));
+  .col-nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+  .col-nav a {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
   }
-  .bf-grid {
-    max-width: 1200px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr; gap: 24px;
-    padding: 12px 16px 24px;
+  .col-nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .col-rooms { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
+  .col-rooms a {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+    text-decoration: none;
   }
-  .bf-h {
-    margin: 0 0 14px;
-    font-family: var(--font-mono, ui-monospace);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
-    color: var(--color-ink-mute, var(--ink-mute)); font-weight: 500;
-  }
-  .bf-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-  .bf-col a { color: var(--color-ink, var(--ink)); font-size: 14px; text-decoration: none; }
-  .bf-col a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  .bf-tags { flex-direction: row; flex-wrap: wrap; gap: 8px 12px; }
-  .bf-tags a { font-family: var(--font-mono, ui-monospace); font-size: 13px; color: var(--color-ink-mute, var(--ink-mute)); }
-  .bf-tags a:hover { color: var(--color-accent, var(--cobalt, #e63a1f)); text-decoration: none; }
-  @media (min-width: 768px) { .bf-grid { grid-template-columns: 1fr 1fr; gap: 32px; padding: 16px 24px 28px; } .bf-quote { padding: 64px 24px 20px; } }
-  @media (min-width: 1024px) { .bf-grid { grid-template-columns: repeat(4, 1fr); padding: 16px 24px 32px; } }
+  .col-rooms a:hover { color: var(--accent); }
 </style>

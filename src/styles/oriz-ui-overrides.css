@@ -179,3 +179,19 @@ form[data-oriz-contact] {
     animation: none;
   }
 }
+
+/* ── Gallery wall: every PostCard listing hangs as a masonry canvas ─────
+   The arts blog presents post listings as a gallery wall of framed pigment
+   tiles, not a ruled ledger. Any `ul.post-list` becomes CSS-columns masonry;
+   its `li` items avoid column breaks. Page-scoped rules only set list-reset,
+   so this cascades cleanly. */
+.post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  column-gap: clamp(1.25rem, 3vw, 2.25rem);
+  column-count: 1;
+}
+@media (min-width: 560px) { .post-list { column-count: 2; } }
+@media (min-width: 960px) { .post-list { column-count: 3; } }
+.post-list > li { break-inside: avoid; }

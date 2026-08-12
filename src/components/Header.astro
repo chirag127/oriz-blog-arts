@@ -3,108 +3,176 @@ import HeaderControls from '~/components/HeaderControls.tsx'
 import MultiSearch from '~/components/MultiSearch.tsx'
 import StatusBanner from '~/components/StatusBanner.astro'
 /*
- * Header — workshop masthead bar ("The Maker's Bench").
+ * Header — gallery entrance rail (not a top-nav magazine bar).
  *
- * Left: pigment-swatch wordmark. Center: Space Grotesk uppercase nav with a
- * cyanotype underline. Right: search, controls. 64px, sticky, linen blur.
+ * The wall does the talking, so the chrome is a thin quiet rail: the pigment
+ * wordmark at left, and at right the controls + a single "Index" disclosure
+ * that slides out the full navigation as a wall directory. No centered
+ * LATEST/SERIES/TAGS/ABOUT strip — that lives inside the index panel.
  */
 import Wordmark from '~/components/Wordmark.astro'
+
+const nav = [
+  { href: '/', label: 'The wall', match: (p: string) => p === '/' },
+  { href: '/blog/', label: 'All works', match: (p: string) => p.startsWith('/blog') },
+  { href: '/series/', label: 'Series', match: (p: string) => p.startsWith('/series') },
+  { href: '/categories/', label: 'Rooms', match: (p: string) => p.startsWith('/categories') },
+  { href: '/tags/', label: 'Tags', match: (p: string) => p.startsWith('/tags') },
+  { href: '/archive/', label: 'Archive', match: (p: string) => p.startsWith('/archive') },
+  { href: '/about/', label: 'About', match: (p: string) => p.startsWith('/about') },
+]
+const path = Astro.url.pathname
 ---
 
 <StatusBanner />
-<header class="site-header" transition:persist="site-header">
-  <div class="container-page header-inner">
-    <div class="brand">
-      <Wordmark subtitle="arts" size={30} href="/" />
+<header class="gallery-rail" transition:persist="site-header">
+  <div class="rail-inner">
+    <div class="rail-brand">
+      <Wordmark subtitle="arts" size={26} href="/" />
     </div>
-    <nav class="header-nav" aria-label="Primary">
-      <a href="/" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>Latest</a>
-      <a href="/series/" aria-current={Astro.url.pathname.startsWith('/series') ? 'page' : undefined}>Series</a>
-      <a href="/tags/" aria-current={Astro.url.pathname.startsWith('/tags') ? 'page' : undefined}>Tags</a>
-      <a href="/about/" aria-current={Astro.url.pathname.startsWith('/about') ? 'page' : undefined}>About</a>
+    <div class="rail-right">
+      <div class="rail-search"><MultiSearch client:idle /></div>
+      <div class="rail-controls"><HeaderControls client:idle /></div>
+      <button
+        type="button"
+        class="rail-index-btn mono"
+        aria-expanded="false"
+        aria-controls="wall-index"
+        data-index-toggle
+      >
+        <span class="rail-index-glyph" aria-hidden="true"></span>
+        <span class="rail-index-label">Index</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="wall-index" class="wall-index" hidden>
+    <button type="button" class="wall-index-close mono" data-index-close aria-label="Close index">Close ✕</button>
+    <nav class="wall-index-nav" aria-label="Primary">
+      <p class="wall-index-eyebrow mono">Directory</p>
+      <ul>
+        {nav.map((n) => (
+          <li>
+            <a href={n.href} aria-current={n.match(path) ? 'page' : undefined}>{n.label}</a>
+          </li>
+        ))}
+      </ul>
     </nav>
-    <div class="header-multisearch">
-      <MultiSearch client:idle />
-    </div>
-    <div class="header-controls-mount">
-      <HeaderControls client:idle />
-    </div>
   </div>
 </header>
 
+<script is:inline>
+  {`(() => {
+    const wire = () => {
+      const btn = document.querySelector('[data-index-toggle]')
+      const panel = document.getElementById('wall-index')
+      if (!btn || !panel || btn.dataset.wired) return
+      btn.dataset.wired = '1'
+      const open = () => { panel.hidden = false; requestAnimationFrame(() => panel.classList.add('is-open')); btn.setAttribute('aria-expanded','true') }
+      const close = () => { panel.classList.remove('is-open'); btn.setAttribute('aria-expanded','false'); setTimeout(() => { panel.hidden = true }, 260) }
+      btn.addEventListener('click', () => (panel.classList.contains('is-open') ? close() : open()))
+      panel.querySelector('[data-index-close]')?.addEventListener('click', close)
+      panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', close))
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.classList.contains('is-open')) close() })
+    }
+    wire()
+    document.addEventListener('astro:page-load', wire)
+  })()`}
+</script>
+
 <style>
-  .site-header {
+  .gallery-rail {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: color-mix(in oklab, var(--paper) 90%, transparent);
-    backdrop-filter: saturate(180%) blur(10px);
-    -webkit-backdrop-filter: saturate(180%) blur(10px);
-    border-bottom: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--paper) 82%, transparent);
+    backdrop-filter: saturate(160%) blur(8px);
+    -webkit-backdrop-filter: saturate(160%) blur(8px);
   }
-  .header-inner {
-    height: 64px;
+  .rail-inner {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
+    height: 60px;
+    max-width: var(--container-page, 1100px);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2.25rem);
   }
-  .brand {
-    flex: 0 0 auto;
+  .rail-brand { flex: 0 0 auto; }
+  .rail-right { margin-left: auto; display: inline-flex; align-items: center; gap: 0.75rem; }
+  .rail-search { display: inline-flex; align-items: center; }
+
+  .rail-index-btn {
     display: inline-flex;
     align-items: center;
-  }
-  .header-nav {
-    display: none;
-    gap: 1.5rem;
-    font-family: var(--font-utility, var(--font-mono));
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    color: var(--ink);
+    font-size: 11px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    cursor: pointer;
+    transition: border-color var(--dur-fast, 120ms) ease, color var(--dur-fast, 120ms) ease;
   }
-  .header-nav a {
-    position: relative;
-    padding-block: 0.375rem;
-    color: var(--color-muted);
+  .rail-index-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .rail-index-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .rail-index-glyph {
+    width: 12px; height: 12px; flex: 0 0 auto;
+    background:
+      linear-gradient(var(--accent), var(--accent)) 0 0 / 100% 2px no-repeat,
+      linear-gradient(var(--accent-warm), var(--accent-warm)) 0 5px / 100% 2px no-repeat,
+      linear-gradient(var(--ochre), var(--ochre)) 0 10px / 100% 2px no-repeat;
+  }
+
+  /* slide-out wall directory */
+  .wall-index {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: min(360px, 86vw);
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+    box-shadow: -20px 0 40px -28px color-mix(in oklab, var(--ink) 60%, transparent);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    transform: translateX(100%);
+    transition: transform var(--dur-base, 240ms) var(--ease-out, ease);
+    z-index: 60;
+    overflow-y: auto;
+  }
+  .wall-index.is-open { transform: translateX(0); }
+  .wall-index-close {
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--ink-mute); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; padding: 0; margin-bottom: 1.75rem;
+  }
+  .wall-index-close:hover { color: var(--accent); }
+  .wall-index-eyebrow {
+    font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--ink-mute); margin: 0 0 1rem;
+  }
+  .wall-index-nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; }
+  .wall-index-nav a {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
     text-decoration: none;
+    padding: 0.25rem 0;
     transition: color var(--dur-fast, 120ms) ease;
   }
-  .header-nav a:hover {
-    color: var(--color-accent);
+  .wall-index-nav a:hover { color: var(--accent); }
+  .wall-index-nav a[aria-current='page'] { color: var(--accent); }
+  .wall-index-nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wall-index { transition: none; }
   }
-  .header-nav a::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 2px;
-    background: var(--color-accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--dur-fast, 120ms) ease;
-  }
-  .header-nav a:hover::after,
-  .header-nav a[aria-current='page']::after {
-    transform: scaleX(1);
-  }
-  .header-nav a[aria-current='page'] {
-    color: var(--color-accent);
-  }
-  @media (min-width: 768px) {
-    .header-nav { display: inline-flex; align-items: center; }
-  }
-  .header-controls-mount {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-  }
-  .header-multisearch {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-  }
-  .header-multisearch + .header-controls-mount {
-    margin-left: 0.75rem;
+
+  @media (max-width: 640px) {
+    .rail-search { display: none; }
   }
 </style>

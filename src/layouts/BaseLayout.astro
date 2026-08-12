@@ -35,8 +35,8 @@ interface Props {
 }
 
 const {
-  title = 'oriz / blog',
-  description = "An engineer's working notebook. Long-form writing on engineering, finance, and books — by Chirag Singhal.",
+  title = "The Maker's Bench",
+  description = "A working studio wall — daily drawing, hand-lettering, and turning a craft into a living, by Chirag Singhal.",
   canonical = `https://blog.oriz.in${Astro.url.pathname}`,
   noindex = false,
   jsonLd,
@@ -70,7 +70,7 @@ const visibleBottomBarActions = hideSidebar
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content={type} />
-    <meta property="og:site_name" content="oriz / blog" />
+    <meta property="og:site_name" content="The Maker's Bench" />
     {ogImage && <meta property="og:image" content={ogImage} />}
     {type === 'article' && pubDate && (
       <meta property="article:published_time" content={pubDate.toISOString()} />
