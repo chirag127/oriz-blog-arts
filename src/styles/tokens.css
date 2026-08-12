@@ -1,0 +1,247 @@
+/*
+ * tokens.css — "The Maker's Bench" identity for arts-blog.oriz.in (2026-08-12).
+ *
+ * Distinct from every sibling oriz.in site. Grounded in the craft workshop:
+ *   Cyanotype indigo ink · unbleached linen paper · madder-rose + raw-ochre
+ *   dye accents · Fraunces display · Newsreader body serif · Space Grotesk meta.
+ *
+ * NOT the oriz-blog "Signal Press" amber/serif look. NOT cream #F4F1EA. The
+ * default surface is a warm greyed linen; ink is deep indigo (never black);
+ * the primary accent is a real craft process colour (cyanotype blue).
+ *
+ * Every --color-* / legacy name is kept as an alias so chrome/legal/Footer
+ * components compile unchanged. Theme modes:
+ *   :root                              → light "unbleached bench" (default)
+ *   @media (prefers-color-scheme:dark) → dark "indigo vat", UNLESS [data-theme="light"]
+ *   [data-theme="dark"]                → dark, always (overrides system)
+ *   [data-theme="sepia"]               → warm kraft-paper variant
+ *   [data-theme="hc"]                  → high contrast
+ */
+:root {
+  color-scheme: light;
+
+  /* ── light "unbleached bench" — the default workshop surface ───────────
+     Unbleached linen paper + kraft panel, deep cyanotype-indigo ink, and a
+     cyanotype-blue signal accent. Madder-rose is the one warm punch; raw
+     ochre the secondary marker. */
+  --brand: #2e5e8c; /* cyanotype blue — links, active, primary */
+  --brand-soft: #dce7f0; /* pale blueprint wash — hover, chips */
+  --success: #3f7d5a; /* verdigris green */
+  --danger-color: #b24a5e; /* madder-rose dye */
+
+  --paper: #f3ede1; /* unbleached linen paper (page bg) */
+  --paper-2: #e7decb; /* kraft panel / elevated surface */
+  --surface: var(--paper-2);
+  --ink: #1b2a4a; /* deep indigo ink (never pure black) */
+  --ink-mute: #6b6a63; /* aged-graphite secondary */
+  --rule: #d4c9b3; /* soft kraft hairline */
+  --rule-strong: #b9a984; /* heavier masthead rule */
+
+  /* madder-rose warm accent + raw-ochre marker — used for the pigment swatch
+     signature and warm ticks. Everything routes through --accent (cyanotype). */
+  --accent-warm: #b24a5e; /* madder-rose */
+  --ochre: #c08a2e; /* raw ochre / gamboge */
+
+  /* canonical accent — cyanotype blue. --cobalt kept as back-compat alias. */
+  --accent: var(--brand);
+  --accent-soft: var(--brand-soft);
+  --cobalt: var(--accent);
+  --brand-tint: var(--brand-soft);
+  --sage: var(--success);
+  --vermilion: var(--danger-color);
+  --highlighter: var(--ochre);
+
+  /* content-vertical marker colours — the pigment palette. Thin swatch ticks
+     only, never the page accent. Dev · Finance · Culture · Health mapped to
+     the workshop's dyes. */
+  --v-dev: #2e5e8c; /* cyanotype blue */
+  --v-finance: #3f7d5a; /* verdigris */
+  --v-culture: #b24a5e; /* madder-rose */
+  --v-health: #c08a2e; /* raw ochre */
+  --v-personal: #6b6a63; /* graphite */
+
+  /* semantic passthroughs */
+  --color-bg: var(--paper);
+  --color-fg: var(--ink);
+  --color-accent: var(--brand);
+  --color-accent-fg: #f3ede1;
+  --color-sage: var(--success);
+  --color-muted: var(--ink-mute);
+  --color-border: var(--rule);
+  --color-bg-soft: var(--paper-2);
+  --color-bg-muted: var(--paper-2);
+  --color-prose: var(--ink);
+  --color-fg-muted: var(--ink-mute);
+  --color-fg-soft: color-mix(in oklab, var(--ink) 55%, var(--paper));
+
+  /* color alias layer (chrome components read these) */
+  --color-brand-indigo: var(--brand);
+  --color-brand-indigo-soft: var(--brand-soft);
+  --color-brand-success: var(--success);
+  --color-brand-danger: var(--danger-color);
+  --color-neutral-0: #f3ede1;
+  --color-neutral-50: #ece3d3;
+  --color-neutral-100: #e7decb;
+  --color-neutral-200: #d4c9b3;
+  --color-neutral-300: #b9a984;
+  --color-neutral-500: #6b6a63;
+  --color-neutral-700: #3a4358;
+  --color-neutral-900: #1b2a4a;
+  --color-neutral-1000: #0f1830;
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-mute: var(--ink-mute);
+  --color-rule: var(--rule);
+
+  /* ── type ───────────────────────────────────────────────────────────
+     Font families are declared ONCE, in global.css @theme. ───────────── */
+
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 48px;
+
+  /* spacing — 8 steps */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* motion — 3 durations + 3 easings */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 360ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* breakpoints */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1440px;
+
+  /* radii + containers — soft hand-cut corners, not zero-radius newspaper */
+  --radius-card: 3px;
+  --radius-button: 3px;
+  --container-page: 1100px;
+}
+
+/* ── DARK "indigo vat" — system preference, unless user forced light ──── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    /* deep indigo-dye-vat surface, blueprint-cyan links, warm dye accents */
+    --brand: #7bb0d9;
+    --brand-soft: #1a2c40;
+    --success: #5fb487;
+    --danger-color: #d98298;
+    --paper: #101725; /* indigo vat */
+    --paper-2: #182238; /* raised panel */
+    --ink: #ece6d8; /* linen text on dark */
+    --ink-mute: #9aa0ac;
+    --rule: #2a3550;
+    --rule-strong: #3a4666;
+    --accent-warm: #d98298;
+    --ochre: #d9a445;
+    --v-dev: #7bb0d9;
+    --v-finance: #5fb487;
+    --v-culture: #d98298;
+    --v-health: #d9a445;
+    --v-personal: #9aa0ac;
+    --color-accent-fg: #101725;
+    --color-fg-soft: color-mix(in oklab, var(--ink) 62%, var(--paper));
+    --color-neutral-50: #182238;
+    --color-neutral-100: #1e2a44;
+    --color-neutral-200: #2a3550;
+    --color-neutral-300: #3a4666;
+    --color-neutral-500: #9aa0ac;
+    --color-neutral-700: #c7cad4;
+    --color-neutral-900: #ece6d8;
+  }
+}
+
+/* ── DARK — explicit user override, wins over system ────────────────── */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --brand: #7bb0d9;
+  --brand-soft: #1a2c40;
+  --success: #5fb487;
+  --danger-color: #d98298;
+  --paper: #101725;
+  --paper-2: #182238;
+  --ink: #ece6d8;
+  --ink-mute: #9aa0ac;
+  --rule: #2a3550;
+  --rule-strong: #3a4666;
+  --accent-warm: #d98298;
+  --ochre: #d9a445;
+  --v-dev: #7bb0d9;
+  --v-finance: #5fb487;
+  --v-culture: #d98298;
+  --v-health: #d9a445;
+  --v-personal: #9aa0ac;
+  --color-accent-fg: #101725;
+  --color-fg-soft: color-mix(in oklab, var(--ink) 62%, var(--paper));
+  --color-neutral-50: #182238;
+  --color-neutral-100: #1e2a44;
+  --color-neutral-200: #2a3550;
+  --color-neutral-300: #3a4666;
+  --color-neutral-500: #9aa0ac;
+  --color-neutral-700: #c7cad4;
+  --color-neutral-900: #ece6d8;
+}
+
+/* ── SEPIA — warm kraft paper, madder-rose accent ───────────────────── */
+:root[data-theme='sepia'] {
+  color-scheme: light;
+  --brand: #a33f52; /* madder leads in the warm variant */
+  --brand-soft: #efdfcf;
+  --paper: #efe3cf; /* darker kraft */
+  --paper-2: #e6d7bd;
+  --ink: #3a2e26;
+  --ink-mute: #7c6a54;
+  --rule: #d3bf9c;
+  --accent-warm: #a33f52;
+  --ochre: #b07d24;
+  --color-accent-fg: #efe3cf;
+  --color-fg-soft: color-mix(in oklab, var(--ink) 55%, var(--paper));
+  --color-neutral-50: #efe3cf;
+  --color-neutral-100: #e6d7bd;
+  --color-neutral-200: #d3bf9c;
+  --color-neutral-500: #7c6a54;
+  --color-neutral-700: #5a4a38;
+  --color-neutral-900: #3a2e26;
+}
+
+/* ── HIGH-CONTRAST — near-white paper, indigo ink, hard borders ─────── */
+:root[data-theme='hc'] {
+  color-scheme: light;
+  --brand: #1d4e7a;
+  --brand-soft: #d3e2f0;
+  --paper: #fbf8f0;
+  --paper-2: #fbf8f0;
+  --ink: #0d1526;
+  --ink-mute: #26304a;
+  --rule: #0d1526;
+  --accent-warm: #8f2e42;
+  --ochre: #8a5e10;
+  --color-accent-fg: #fbf8f0;
+  --color-fg-soft: #26304a;
+  --color-neutral-50: #fbf8f0;
+  --color-neutral-100: #fbf8f0;
+  --color-neutral-200: #0d1526;
+  --color-neutral-500: #26304a;
+  --color-neutral-700: #0d1526;
+  --color-neutral-900: #0d1526;
+}

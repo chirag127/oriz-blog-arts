@@ -1,0 +1,137 @@
+---
+/*
+ * Wordmark — "The Maker's Bench".
+ *
+ * The brand mark is a hand-cut monogram: the word "Bench" set in Fraunces
+ * display, prefixed by a small three-band pigment swatch (cyanotype · madder ·
+ * ochre) — the maker's colour chart in miniature, the site's signature object
+ * shrunk to a mark. No SVG strike; the swatch IS the anchor.
+ */
+
+interface Props {
+  /** Sub-section name — rendered after a `·` separator. */
+  subtitle?: string
+  /** Display size in CSS pixels. */
+  size?: number
+  /** Wrap the mark in an <a href="/"> — defaults to '/' when subtitle is set. */
+  href?: string | null
+  /** Render as <h1> (the masthead) rather than <div>. */
+  asHeading?: boolean
+}
+
+const { subtitle, size = 96, href = null, asHeading = false } = Astro.props
+const Tag = asHeading ? 'h1' : ('div' as const)
+---
+
+{
+  href ? (
+    <a class="wordmark-link" href={href} aria-label={subtitle ? `The Maker's Bench · ${subtitle}` : "The Maker's Bench"}>
+      <Tag class="wordmark" style={`--wm-size: ${size}px;`}>
+        <span class="wordmark-swatch" aria-hidden="true">
+          <span class="sw sw-indigo"></span>
+          <span class="sw sw-madder"></span>
+          <span class="sw sw-ochre"></span>
+        </span>
+        <span class="wordmark-word">
+          <span class="wordmark-the">The&nbsp;Maker's</span>
+          <span class="wordmark-bench">Bench</span>
+        </span>
+        {subtitle && (
+          <>
+            <span class="wordmark-sep" aria-hidden="true">·</span>
+            <span class="wordmark-sub">{subtitle}</span>
+          </>
+        )}
+      </Tag>
+    </a>
+  ) : (
+    <Tag class="wordmark" style={`--wm-size: ${size}px;`}>
+      <span class="wordmark-swatch" aria-hidden="true">
+        <span class="sw sw-indigo"></span>
+        <span class="sw sw-madder"></span>
+        <span class="sw sw-ochre"></span>
+      </span>
+      <span class="wordmark-word">
+        <span class="wordmark-the">The&nbsp;Maker's</span>
+        <span class="wordmark-bench">Bench</span>
+      </span>
+      {subtitle && (
+        <>
+          <span class="wordmark-sep" aria-hidden="true">·</span>
+          <span class="wordmark-sub">{subtitle}</span>
+        </>
+      )}
+    </Tag>
+  )
+}
+
+<style>
+  .wordmark-link {
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42em;
+    margin: 0;
+    font-family: var(--font-display);
+    line-height: 1;
+    color: var(--ink);
+    /* the wordmark scales off a small base; the display word is set relative */
+    font-size: calc(var(--wm-size, 96px) * 0.62);
+  }
+  /* pigment swatch — three stacked dye bands, the signature object as a mark */
+  .wordmark-swatch {
+    display: inline-flex;
+    flex-direction: column;
+    width: 0.34em;
+    height: 1.02em;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+  .sw { flex: 1; }
+  .sw-indigo { background: var(--accent); }
+  .sw-madder { background: var(--accent-warm); }
+  .sw-ochre { background: var(--ochre); }
+
+  .wordmark-word {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.28em;
+  }
+  .wordmark-the {
+    font-family: var(--font-utility);
+    font-weight: 500;
+    font-size: 0.4em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .wordmark-bench {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-variation-settings: "opsz" 40, "SOFT" 40;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .wordmark-link:hover .wordmark-bench { color: var(--accent); }
+
+  .wordmark-sep {
+    margin-inline: 0.12em;
+    color: var(--ink-mute);
+    font-weight: 400;
+    font-size: 0.7em;
+  }
+  .wordmark-sub {
+    color: var(--accent);
+    font-family: var(--font-utility);
+    font-weight: 500;
+    font-size: 0.42em;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+  }
+</style>
