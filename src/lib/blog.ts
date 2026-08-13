@@ -81,6 +81,13 @@ function partKey(p: BlogPost): number {
   return Number.POSITIVE_INFINITY
 }
 
+/** True for a series sub-part (numeric `part` >= 1); false for standalone posts and series landings (`part` 0 / absent). */
+function isSeriesPart(p: BlogPost): boolean {
+  const v = p.data.part
+  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number.parseInt(v, 10) : Number.NaN
+  return Number.isFinite(n) && n >= 1
+}
+
 /**
  * Related posts. Ranking:
  *   1. Posts in the same series (highest priority)
@@ -188,7 +195,7 @@ export async function getAuthorsWithCounts(): Promise<{ author: string; count: n
 
 /** Group posts by year (newest first). */
 export async function getPostsByYear(): Promise<{ year: number; posts: BlogPost[] }[]> {
-  const posts = await getPublishedPosts()
+  const posts = (await getPublishedPosts()).filter((p) => !isSeriesPart(p))
   const m = new Map<number, BlogPost[]>()
   for (const p of posts) {
     const y = p.data.pubDate.getFullYear()
